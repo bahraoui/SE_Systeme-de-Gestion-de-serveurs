@@ -52,7 +52,6 @@ void copy_list() {
 
 }
 
-
 enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp) {
     /**
      * difference entre les deux dates
@@ -66,7 +65,6 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp) {
     return CREATE;
     
 }
-
 
 time_t string_to_date(char* chaineDate) {
     time_t begin = time( NULL );
@@ -89,7 +87,6 @@ bool action_case_file(enum caseFile action, char* nomFichier) {
 
     return false;
 }
-
 
 
 const char* getfield(char* line, int num)

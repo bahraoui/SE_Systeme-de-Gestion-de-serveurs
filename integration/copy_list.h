@@ -33,8 +33,15 @@ bool action_case_file(enum caseFile action, char* nomFichier);
 time_t string_to_date(char* chaineDate);
 
 
+/**
+ * Récupere la données d'une ligne csv selon un indice donné en paramètre
+ * 
+ */ 
+const char* getfield(char* line, int num);
+
+
 void copy_list();
 
-const char* getfield(char* line, int num);
+
 
  
