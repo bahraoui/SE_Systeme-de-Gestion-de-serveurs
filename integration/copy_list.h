@@ -9,6 +9,13 @@
 #define MAX_SIZE 80
 #define NAME_LIST "list_fic.csv"
 
+/**
+ * CREATE = 
+ * UPDATE = 
+ * DELETE = 
+ * INEXIST = 
+ * 
+*/
 enum caseFile { CREATE, UPDATE, DELETE, INEXIST};
 
 //bool pingFile(void);

@@ -3,7 +3,6 @@
 
 void copy_list() {
     
-
     //A FAIRE DANS LE MAIN
 
     /*if (false){
@@ -46,7 +45,6 @@ void copy_list() {
         free(nomFichier);
         free(chaineDateProd);
         free(chaineDateBackUp);
-
 	}
     fclose(listCSV);
 
@@ -71,7 +69,7 @@ time_t string_to_date(char* chaineDate) {
     return begin;
 }
 
-bool action_case_file(enum caseFile action, char* nomFichier) {
+bool action_case_file(enum caseFile action, char* nomFichierCompare) {
 
     /**
      * si action == create
@@ -83,9 +81,79 @@ bool action_case_file(enum caseFile action, char* nomFichier) {
      *  
      * 
      * 
-     */ 
+     */
+    bool retour = false;
+    char ligne[1024];
+    FILE * listCSV = fopen(NAME_LIST, "r");
+    FILE * tmp = fopen("temp.csv", "w");
+    printf("action en cours...\n");
 
-    return false;
+    if ( listCSV == NULL ) {
+        printf( "Cannot open file %s\n", NAME_LIST);
+    }else
+    {
+        while (fgets(ligne, 1024, listCSV))
+	    {
+               
+        char* nomFichier = strdup(getfield(strdup(ligne),1));
+        char* chaineDateProd = strdup(getfield(strdup(ligne),2));
+        char* chaineDateBackUp = strdup(getfield(strdup(ligne),3));
+        switch (action)
+        {
+        case CREATE:
+            printf("CREATE\n");
+            if(strcmp(nomFichier,nomFichierCompare) == 0){ // ce if se fera surement en dehors du switch/case
+                // mettre a jour csv:
+                /**
+                 * ajouter le nv fichier ac la bonne date à temp dans ce if
+                 * et dans le else ajouter la ligne classique
+                 */
+                // ajouter le nv fichier dans BackUp
+                break;
+            }
+            retour = true;
+            break;
+        
+        case UPDATE:
+            printf("UPDATE\n");
+            // mettre a jour csv:
+            /**
+             * modifier le fichier ac la bonne date à temp dans ce if
+             * et dans le else ajouter la ligne classique
+             */
+            // ajouter le nv fichier dans BackUp:
+            /**
+             * supprimer le fichier de meme nom dans BackUp
+             * ajouter le fichier modifie de prod dans BackUp
+             */
+            retour = true;
+            break;
+        
+        case DELETE:
+            printf("ERREUR DELETE\n");
+            break;
+        
+        case INEXIST:
+            printf("ERREUR INEXIST\n");
+            break;
+        
+        default:
+            break;
+        }
+        free(nomFichier);
+        free(chaineDateProd);
+        free(chaineDateBackUp);
+	    }
+        
+    }
+
+    fclose(tmp);
+    fclose(listCSV);
+    remove(NAME_LIST);
+    rename("temp.csv",NAME_LIST);
+
+    printf("action bien fini.\n");
+    return retour;
 }
 
 
