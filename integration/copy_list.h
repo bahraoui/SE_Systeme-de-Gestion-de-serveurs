@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
+#include <errno.h>
 
 #define MAX_UTILISATEUR 100
 #define MAX_SIZE 80
-
+#define NAME_LIST "list_fic.csv"
 
 enum caseFile { CREATE, UPDATE, DELETE, INEXIST};
 
@@ -37,3 +39,7 @@ time_t string_to_date(char* chaineDate);
 
 
 void copy_list();
+
+const char* getfield(char* line, int num);
+
+ 

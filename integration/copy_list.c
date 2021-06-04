@@ -16,25 +16,41 @@ void copy_list() {
         exit(EXIT_FAILURE);
     }*/
 
-    //recup taille list_fic.csv
-    int ligneListCSV = 1;
-    //On recupere le contenu du fichier list_fic.csv
     
     //parcours chaque ligne du CSV
-    int i = 0;
-    char* ligne = NULL;
-    char* nomFichier = NULL;
+    char ligne[1024];
+    enum caseFile action;
     time_t dateProd;
     time_t dateBackUp;
 
-    enum caseFile action;
+    FILE * listCSV = fopen(NAME_LIST, "r" );
 
-    for (i = 0; i <ligneListCSV; i++) {
-        //recup la ligne
+    if ( listCSV == NULL ) {
+        printf( "Cannot open file %s\n", NAME_LIST );
+        exit( 0 );
+    }
+    while (fgets(ligne, 1024, listCSV))
+	{
+               
+        char* nomFichier = strdup(getfield(strdup(ligne),1));
+        char *chaineDateProd = strdup(getfield(strdup(ligne),2));
+        char* chaineDateBackUp = strdup(getfield(strdup(ligne),3));
+
+        dateProd = string_to_date(chaineDateProd);
+        dateBackUp = string_to_date(chaineDateBackUp);
+
         split_data(ligne,nomFichier,&dateProd,&dateBackUp); 
         action = csv_analyse_line(dateProd, dateBackUp);
-        action_case_file(action,nomFichier); 
-    }
+        action_case_file(action,nomFichier);     
+
+
+        free(nomFichier);
+        free(chaineDateProd);
+        free(chaineDateBackUp);
+
+	}
+    fclose(listCSV);
+
 }
 
 
@@ -84,4 +100,16 @@ bool action_case_file(enum caseFile action, char* nomFichier) {
 
 
 
-    
+const char* getfield(char* line, int num)
+{
+	const char* tok;
+	for (tok = strtok(line, ";");
+			tok && *tok;
+			tok = strtok(NULL, ";\n"))
+	{
+		if (!--num)
+			return tok;
+	}
+	return NULL;
+}
+ 
