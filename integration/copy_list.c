@@ -39,7 +39,6 @@ void copy_list() {
         dateProd = string_to_date(chaineDateProd);
         dateBackUp = string_to_date(chaineDateBackUp);
 
-        split_data(ligne,nomFichier,&dateProd,&dateBackUp); 
         action = csv_analyse_line(dateProd, dateBackUp);
         action_case_file(action,nomFichier);     
 
@@ -68,13 +67,6 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp) {
     
 }
 
-void split_data(char* ligne,char* nomFichier,time_t* dateProd,time_t* dateBackup) {
-    /**
-     * On split la ligne
-     * On transforme les chaines des dates en type date
-     * On update les variables
-     */ 
-}
 
 time_t string_to_date(char* chaineDate) {
     time_t begin = time( NULL );

@@ -27,11 +27,6 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp);
 */
 bool action_case_file(enum caseFile action, char* nomFichier);
 
-/*
-* changer la valeur des variables nomfichier et des deux dates
-*/
-void split_data(char* ligne,char* nomFichier,time_t* dateProd,time_t* dateBackup);
-
 /**
  * Récupère la chaine du csv et on renvoie une date
  */
