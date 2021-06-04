@@ -29,6 +29,7 @@ void copy_list() {
         printf( "Cannot open file %s\n", NAME_LIST );
         exit( 0 );
     }
+    fgets(ligne, 1024, listCSV);
     while (fgets(ligne, 1024, listCSV))
 	{
                
@@ -67,8 +68,15 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp) {
 }
 
 time_t string_to_date(char* chaineDate) {
-    time_t begin = time( NULL );
-    return begin;
+    time_t date;
+    printf("DATE CHAINE RECUP : %s\n",chaineDate);
+    struct tm tmdate = {0};
+    tmdate.tm_year = atoi(&chaineDate[0]) - 1900;
+    tmdate.tm_mon = atoi(&chaineDate[5]) - 1;
+    tmdate.tm_mday = atoi(&chaineDate[8]);
+    date = mktime( &tmdate );
+
+    return date;
 }
 
 bool action_case_file(enum caseFile action, char* nomFichier) {
