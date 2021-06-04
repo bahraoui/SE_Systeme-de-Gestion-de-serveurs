@@ -1,9 +1,39 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <time.h>
 
 #define MAX_UTILISATEUR 100
+#define MAX_SIZE 80
 
-int copy_list();
-int taille_char(char *str);
+
+enum caseFile { CREATE, UPDATE, DELETE, INEXIST};
+
+//bool pingFile(void);
+
+//bool lock_file(void);
+
+/*
+* prend les 2 dates et renvoie l'action a faire enum
+*/
+enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp);
+
+
+/*
+* Effectue l'action selon le enum
+* switch case
+*/
+bool action_case_file(enum caseFile action, char* nomFichier);
+
+/*
+* changer la valeur des variables nomfichier et des deux dates
+*/
+void split_data(char* ligne,char* nomFichier,time_t* dateProd,time_t* dateBackup);
+
+/**
+ * Récupère la chaine du csv et on renvoie une date
+ */
+time_t string_to_date(char* chaineDate);
+
+
+void copy_list();

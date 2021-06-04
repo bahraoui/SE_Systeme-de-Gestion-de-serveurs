@@ -4,8 +4,9 @@
 
 int main(int argc, char const *argv[])
 {
-    printf("Hello world !\n");
+
     copy_list();
+
     return 0;
 }
 

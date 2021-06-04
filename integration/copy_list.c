@@ -1,44 +1,87 @@
 #include "copy_list.h"
 
-int copy_list(){
-    char utilisateur[MAX_UTILISATEUR];
-    cuserid(utilisateur);
-    printf("utilisateur actuel : %s\n", utilisateur);
-    char cmd_part1[] = "@localhost:/mnt/d/WORK/SCHOOL/IATIC_ISTY/Annee3/PROJETS/SE_Systeme-de-Gestion-de-serveurs/integration/stats.csv ";
-    char cmd_part2[] = " /home/marwane/";
-    //commande_ssh = malloc(taille_char(utilisateur) + sizeof(cmd_part1) + sizeof(cmd_part2));
-    char* const commande_ssh[2] = {cmd_part1,cmd_part2};
-    strcat(utilisateur,cmd_part1);
-    printf("utilisateur +host : %s\n",cmd_part1);
-    printf("commande qui va etre lance : scp %s%s\n",commande_ssh[0],commande_ssh[1]);
-    if(execl("/usr/bin/scp",cmd_part1,cmd_part2,(char *)0)){
-        printf("bonne fin\n");
-        return EXIT_SUCCESS;
-    } else {
-        printf("mauvaise fin\n");
-        return EXIT_FAILURE;
+
+void copy_list() {
+    
+
+    //A FAIRE DANS LE MAIN
+
+    /*if (false){
+        printf("PING PAS PASSE");
+        exit(EXIT_FAILURE);
     }
-    /*
-    if(system(commande_ssh)){
-        printf("bonne fin\n");
-        return EXIT_SUCCESS;
-    } else {
-        printf("mauvaise fin\n");
-        return EXIT_FAILURE;
+
+    if (!lock_file()) { //lock list_fic.csv
+        printf("PAS REUSSI A VERROUILLER");
+        exit(EXIT_FAILURE);
     }*/
-    return EXIT_FAILURE;
+
+    //recup taille list_fic.csv
+    int ligneListCSV = 1;
+    //On recupere le contenu du fichier list_fic.csv
+    
+    //parcours chaque ligne du CSV
+    int i = 0;
+    char* ligne = NULL;
+    char* nomFichier = NULL;
+    time_t dateProd;
+    time_t dateBackUp;
+
+    enum caseFile action;
+
+    for (i = 0; i <ligneListCSV; i++) {
+        //recup la ligne
+        split_data(ligne,nomFichier,&dateProd,&dateBackUp); 
+        action = csv_analyse_line(dateProd, dateBackUp);
+        action_case_file(action,nomFichier); 
+    }
 }
 
-int taille_char(char *str){
-    int i=0;
-    printf("debut===\n");
-    for (i = 0; i < sizeof(str); i++){
-        printf("%c",str[i]);
-        if (str[i]=='\0'){
-            printf("\n");
-            return i;
-        }
-    }
-    printf("====fin\n");
-    return 0;    
+
+enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp) {
+    /**
+     * difference entre les deux dates
+     *  Si la date de modification du serv Back up est NULL
+            return CREATE
+
+        SINON Si la date du serv Prod > la date du serv Back up
+            return UPDATE        
+     * 
+     */ 
+    return CREATE;
+    
 }
+
+void split_data(char* ligne,char* nomFichier,time_t* dateProd,time_t* dateBackup) {
+    /**
+     * On split la ligne
+     * On transforme les chaines des dates en type date
+     * On update les variables
+     */ 
+}
+
+time_t string_to_date(char* chaineDate) {
+    time_t begin = time( NULL );
+    return begin;
+}
+
+bool action_case_file(enum caseFile action, char* nomFichier) {
+
+    /**
+     * si action == create
+     *      On cree dans backup le fichier create
+     * 
+     * 
+     * si action == update
+     *      On update
+     *  
+     * 
+     * 
+     */ 
+
+    return false;
+}
+
+
+
+    
