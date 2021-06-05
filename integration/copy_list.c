@@ -195,9 +195,9 @@ void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
     time_t timestamp = time( NULL );
     FILE *fileLog;
     char curentDate[ MAX_SIZE ];
-    struct tm * pTime = localtime( & timestamp );
+    struct tm * pTime = localtime(&timestamp);
     char messageLogs[MAX_MESSAGE] = "";
-    char messageCSV[MAX_MESSAGE] = "";
+    char messageCSV[MAX_SIZE] = "";
     
     //Date du jour
     strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
