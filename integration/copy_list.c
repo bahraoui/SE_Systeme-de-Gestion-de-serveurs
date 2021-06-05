@@ -40,12 +40,14 @@ void copy_list()
         
         action = csv_analyse_line(dateProd, dateBackUp);
         //copyData = action_case_file(action,nomFichier);
-        generate_logs_stats(nomFichier,action,true);
+        generate_logs(nomFichier,action,true);
 
         free(nomFichier);
         free(chaineDateProd);
         free(chaineDateBackUp);
+        recu++;
     }
+    generate_stats();
     fclose(listCSV);
 }
 
@@ -167,7 +169,6 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             free(chaineDateBackUp);
         }
     }
-
     fclose(tmp);
     fclose(listCSV);
     remove(NAME_LIST);
@@ -190,18 +191,47 @@ const char *get_field(char *line, int num)
     return NULL;
 }
 
-void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
+void generate_stats(){
+    time_t timestamp = time( NULL );
+    FILE *fileStats;
+    char curentDate[MAX_SIZE];
+    struct tm * pTime = localtime(&timestamp);
+    char messageCSV[MAX_SIZE] = "\n";
+    
+    //Date du jour
+    strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
+
+    strcat(messageCSV,curentDate);
+    strcat(messageCSV,";COPY;");
+
+    char sucessChaine[12];
+    sprintf(sucessChaine, "%d", success);
+    strcat(messageCSV,sucessChaine);
+    strcat(messageCSV,";");
+
+    char failedChaine[12];
+    sprintf(failedChaine, "%d", failed);
+
+    strcat(messageCSV,failedChaine);
+
+    fileStats = fopen("stats.csv", "a");
+    fprintf(fileStats,messageCSV);
+    fclose(fileStats);
+}
+
+
+void generate_logs(char* nomFichier, enum caseFile action, bool error) {
     time_t timestamp = time( NULL );
     FILE *fileLog;
-    char curentDate[ MAX_SIZE ];
+    char curentDate[MAX_SIZE];
     struct tm * pTime = localtime(&timestamp);
     char messageLogs[MAX_MESSAGE] = "";
-    char messageCSV[MAX_SIZE] = "";
     
     //Date du jour
     strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
 
     strcat(messageLogs,curentDate);
+    
 
     switch (action)
     {
@@ -210,8 +240,7 @@ void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
             strcat(messageLogs," : [CREATE-SUCCESS] ");
             strcat(messageLogs,nomFichier);
             strcat(messageLogs," in BACKUP\n"); 
-        }
-            
+        } 
         else {
             strcat(messageLogs," : [CREATE-FAILED] ");  
             strcat(messageLogs,nomFichier);
@@ -280,9 +309,11 @@ bool transfert(char* ficSrc,char* destination){
      */
     if(!system(commandeFinal)){
         printf("bonne fin\n");
+        success++;
         return true;
     } else {
         printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n");
+        failed++;
         return false;
     }
     return false;

@@ -20,6 +20,10 @@
 #define NAME_PROD "production" /* serveur de production */
 #define NAME_BACKUP "backup" /* serveur backup */
 
+int recu;
+int success;
+int failed;
+
 /**
  * CREATE  = Existe dans Prod pas dans BackUp
  * UPDATEB = Mettre a jour un fichier de BackUp par rapport à Prod
@@ -52,10 +56,14 @@ const char* get_field(char* line, int num);
 
 
 /**
- * Ajoute dans le fichier logs et stats les informations d'une copie
+ * Ajoute dans le fichier logs  les informations d'une copie
  * 
  */
-void generate_logs_stats(char* nomFichier, enum caseFile action, bool erreur);
+void generate_logs(char* nomFichier, enum caseFile action, bool erreur);
+
+
+void generate_stats();
+
 
 
 void copy_list();
