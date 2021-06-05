@@ -1,18 +1,5 @@
-#define MAX_UTILISATEUR 100
-#define MAX_SIZE 80
-#define NAME_LIST "list_fic.csv"
 #define __USE_XOPEN
 #define _GNU_SOURCE
-
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <pthread.h>
-
 #define MAX_UTILISATEUR 100
 #define MAX_SIZE 80
 #define MAX_PATH_SIZE 400
@@ -21,6 +8,14 @@
 #define NAME_PROD "../production/" /* serveur de production */
 #define NAME_BACKUP "../backup/" /* serveur backup */
 #define NAME_STAT_COPY "stats_copy.csv" /* stats pour le module copy */
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <errno.h>
+#include <pthread.h>
 
 /**
  * Le nombre de fichier recu par le module

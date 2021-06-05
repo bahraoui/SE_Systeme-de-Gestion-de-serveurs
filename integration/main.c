@@ -16,14 +16,21 @@ int main(int argc, char const *argv[])
     int compteur = 0;
     while (true)
     {
+        sleep(2);
         while(serveurProd){
-            compteur++;
-            sleep(3);
+            printf("Le serveur Production est en ligne.\n");
+            sleep(1);
             if (serveurBackUp)
             {
-                printf("modification en cours...\n");
+                compteur++;
+                printf("modification %d en cours...\n",compteur);
+                sleep(2);
+                printf("modification %d fini.\n",compteur);
+
+                /*
+                printf("modification %d en cours...\n",compteur);
                 printf("synchronisation de la liste en cours...\n");
-                synchro_list(&mutexProd,&mutexBackUp,&mutexLogs,&mutexStats,&mutexListe);
+                //synchro_list(&mutexProd,&mutexBackUp,&mutexLogs,&mutexStats,&mutexListe);
                 sleep(2);
                 printf("synchronisation de la liste fini.\n");
                 printf("copie en cours...\n");
@@ -34,22 +41,32 @@ int main(int argc, char const *argv[])
                 // synchro_list();
                 sleep(2);
                 printf("synchronisation de la liste fini.\n");
-                printf("modification en cours...\n");
+                printf("modification %d fini.\n",compteur);
+                */
+            } else {
+                printf("Le serveur BackUp n'est plus en ligne.\n");
+                printf("Tentative de reconnexion du serveur Backup...\n");
             }
             
-            
+            serveurBackUp = test_server("../backup/ping","/dev/null");
             serveurProd = test_server("../production/ping","/dev/null");
         }
         while(serveurBackUp && !serveurProd){
-            compteur++;
+            sleep(1);
+            printf("Le serveur production s'est arrete. Le serveur BackUp prend la main\n");
+
+            
+            printf("Tentative de reconnexion du serveur Production...\n");
+            sleep(2);
+
             serveurBackUp = test_server("../backup/ping","/dev/null");
+            serveurProd = test_server("../production/ping","/dev/null");
         }
         if (!serveurBackUp && !serveurProd)
         {
             printf("Les serveurs BackUp & Production ne sont plus en ligne.\nVeuillez contacter l'administration de PHARMOS et leur indiquer l'erreur suivant : XG98LO\n");
             exit(EXIT_FAILURE);
         }
-        
     }
     
     return 0;

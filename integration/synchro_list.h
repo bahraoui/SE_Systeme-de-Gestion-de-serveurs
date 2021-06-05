@@ -4,9 +4,9 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#define __USE_XOPEN
 #include <time.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 void date_to_string(time_t date, char *mtime);
 void list_fic(const char *chemin, FILE *file, int longPath);

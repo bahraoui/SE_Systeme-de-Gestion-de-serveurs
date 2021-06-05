@@ -210,7 +210,7 @@ void generate_stats(){
 
     //On ajoute la ligne dans le fichier
     fileStats = fopen(NAME_STAT_COPY, "a");
-    fprintf(fileStats,messageCSV);
+    fprintf(fileStats,"%s",messageCSV);
     fclose(fileStats);
 }
 
@@ -285,7 +285,7 @@ void generate_logs(char* nomFichier, enum caseFile action, bool error) {
 
     //On ajoute la ligne de logs dans le fichier
     fileLog = fopen("logs.txt", "a");
-    fprintf(fileLog,messageLogs);
+    fprintf(fileLog,"%s",messageLogs);
     fclose(fileLog);
 }
 
@@ -305,12 +305,12 @@ bool transfert(char* ficSrc,char* destination){
      * si l'execution s'est bien passe
      */
     if(!system(commandeFinal)){
-        printf("bonne fin\n");
+        printf("Transfert de %s réussi.\n",ficSrc);
         success++;
         return true;
     } else {
         printf("Le systeme a essaye en vain d'executer cette commande : %s\n",commandeFinal);
-        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n\t1. Vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. Vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n\t3. Pour tout autre problème, veuillez verifier votre systeme UNIX.\n\n");
+        printf("Le transfert ne s'est pas bien passe car  soit:\n\t1. vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n\t3. Pour tout autre problème, veuillez verifier votre systeme UNIX ou contacter notre responsable technique : \"alexandre.khel@gmail.com\" .\n\n");
         failed++;
         return false;
     }
@@ -318,6 +318,8 @@ bool transfert(char* ficSrc,char* destination){
 }
 
 bool test_server(char* ficSrc,char* destination){
+    if (realpath(ficSrc,NULL)==NULL) // on verifie bien que le fichier existe
+        return false;
     char commandeFinal[MAX_PATH_SIZE] = "scp "; // la commande final a executer
     char utilisateur[MAX_UTILISATEUR]; // l'utilisateur actuel
     cuserid(utilisateur); // attribution de l'utilisateur actuel
@@ -326,19 +328,18 @@ bool test_server(char* ficSrc,char* destination){
     strcat(commandeFinal,realpath(ficSrc,NULL)); // on ajoute le fichier a copier
     strcat(commandeFinal," "); 
     strcat(commandeFinal,destination); // on ajoute la destination ou l'on copiera le fichier
-    strcat(commandeFinal," "); // on enleve la sortie de la commande pour un affichage plus propre
+    strcat(commandeFinal," 1>/dev/null 2>/dev/null "); // on enleve la sortie de la commande pour un affichage plus propre
     /**
      * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir 
      * si l'execution s'est bien passe
      */
     if(!system(commandeFinal)){
-        printf("bonne fin\n");
+        printf("Connexion au serveur réussi.\n");
         success++;
         return true;
     } else {
         printf("Le systeme a essaye en vain d'executer cette commande : %s\n",commandeFinal);
-        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n\t1. Vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. Vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n\t3. Pour tout autre problème, veuillez verifier votre systeme UNIX.\n\n");
-        failed++;
+        printf("Le transfert ne s'est pas bien passe car  soit:\n\t1. vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n\t3. Pour tout autre problème, veuillez verifier votre systeme UNIX ou contacter notre responsable technique : \"alexandre.khel@gmail.com\" .\n\n");        failed++;
         return false;
     }
     return false;
