@@ -155,9 +155,6 @@ void write_synchro_file(char* prod, char* backup, char* dest) {
 
 int synchro_list(){
 
-
-	//si down pas fait
-
 	//Ouverture du fichier de récupération de l'analyse du répertoire de production
 	FILE* production = fopen("production.csv","w");
 
