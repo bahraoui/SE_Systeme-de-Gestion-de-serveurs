@@ -15,7 +15,7 @@
 #define MAX_UTILISATEUR 100
 #define MAX_SIZE 80
 #define MAX_PATH_SIZE 400
-#define MAX_MESSAGE 500
+#define MAX_MESSAGE 100
 #define NAME_LIST "list_fic.csv" /* liste des fichiers synchronises entre backup et prod */
 #define NAME_PROD "production" /* serveur de production */
 #define NAME_BACKUP "backup" /* serveur backup */
