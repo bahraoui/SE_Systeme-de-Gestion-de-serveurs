@@ -11,8 +11,8 @@ static bool serveurProd, serveurBackUp;
 
 int main(int argc, char const *argv[])
 {
-    serveurProd = test_server("../production/ping","/dev/null"); // remplacer transfert("../production/ping","/dev/null") par test server
-    serveurBackUp = test_server("../backup/ping","/dev/null"); // remplacer transfert("../production/ping","/dev/null") par test server
+    serveurProd = test_server("../production/ping","/dev/null"); // remplacer test_server("../production/ping","/dev/null") par test server
+    serveurBackUp = test_server("../backup/ping","/dev/null"); // remplacer test_server("../production/ping","/dev/null") par test server
     int compteur = 0;
     while (true)
     {
@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
             {
                 printf("modification en cours...\n");
                 printf("synchronisation de la liste en cours...\n");
-                // synchro_list();
+                synchro_list(&mutexProd,&mutexBackUp,&mutexLogs,&mutexStats,&mutexListe);
                 sleep(2);
                 printf("synchronisation de la liste fini.\n");
                 printf("copie en cours...\n");
