@@ -17,8 +17,8 @@
 #define MAX_PATH_SIZE 400
 #define MAX_MESSAGE 500
 #define NAME_LIST "list_fic.csv" /* liste des fichiers synchronises entre backup et prod */
-#define NAME_PROD "production" /* serveur de production */
-#define NAME_BACKUP "backup" /* serveur backup */
+#define NAME_PROD "../production/" /* serveur de production */
+#define NAME_BACKUP "../backup/" /* serveur backup */
 
 /**
  * CREATE  = Existe dans Prod pas dans BackUp
@@ -37,7 +37,7 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp);
  * Effectue l'action selon le enum
  * switch case
  */
-bool action_case_file(enum caseFile action, char* nomFichier);
+bool action_case_file(enum caseFile action, char* nomFichier, int numListe);
 
 /**
  * Récupère la chaine du csv et on renvoie une date

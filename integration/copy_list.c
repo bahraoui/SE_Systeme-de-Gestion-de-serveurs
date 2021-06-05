@@ -82,100 +82,60 @@ time_t string_to_date(char *chaineDateComplete)
     return date;
 }
 
-/***
- * Parametre adresse de mutex
- * 
- * mutex crée dans le main
- * 
- */
-bool action_case_file(enum caseFile action, char *nomFichierCompare)
+bool action_case_file(enum caseFile action, char *nomFichierCompare,int numLigne)
 {
-
-    /**
-     * si action == create
-     *      On cree dans backup le fichier create
-     * 
-     * si action == update
-     *      On update
-     */
-    bool retour = false;
-    char ligne[1024];
-    FILE *listCSV = fopen(NAME_LIST, "r");
-    FILE *tmp = fopen("temp.csv", "w");
+    bool codeDeRetour = false;
     printf("action en cours...\n");
-
-    if (listCSV == NULL)
-    {
-        printf("Cannot open file %s\n", NAME_LIST);
-    }
-    else
-    {
-        while (fgets(ligne, 1024, listCSV))
+    switch (action)
         {
+        case CREATE: ;
+            // ajouter le nv fichier dans BackUp
+            char chemin[MAX_PATH_SIZE] = "";
+            strcat(chemin,NAME_BACKUP);
+            strcat(chemin,nomFichierCompare);
+            remove(chemin);
+            transfert(chemin,NAME_BACKUP);
+            codeDeRetour = true;
+            break;
 
-            //if (strcmp(nomFichier, nomFichierCompare) == 0) {
-            char *nomFichier = strdup(get_field(strdup(ligne), 1));
-            char *chaineDateProd = strdup(get_field(strdup(ligne), 2));
-            char *chaineDateBackUp = strdup(get_field(strdup(ligne), 3));
-            if (strcmp(nomFichier, nomFichierCompare) == 0)
-            {
-                switch (action)
-                {
-                case CREATE:
-                    printf("CREATE\n");
-                    // mettre a jour csv:
-                    /**
-                     * ajouter le nv fichier ac la bonne date à temp dans ce if
-                     * et dans le else ajouter la ligne classique
-                     */
-                    // ajouter le nv fichier dans BackUp
-                    transfert(nomFichierCompare,NAME_BACKUP);
-                    retour = true;
-                    break;
+        case UPDATEB: ;
+            // ajouter le nv fichier dans BackUp:
+            /**
+             * supprimer le fichier de meme nom dans BackUp
+             * ajouter le fichier modifie de prod dans BackUp
+             */
+            char chemin2[MAX_PATH_SIZE] = "";
+            strcat(chemin2,NAME_BACKUP);
+            strcat(chemin2,nomFichierCompare);
+            remove(chemin2);
+            transfert(chemin2,NAME_BACKUP);
+            codeDeRetour = true;
+            break;
 
-                case UPDATEB:
-                    printf("UPDATE\n");
-                    // mettre a jour csv:
-                    /**
-                     * modifier le fichier ac la bonne date à temp dans ce if
-                     * et dans le else ajouter la ligne classique
-                     */
-                    // ajouter le nv fichier dans BackUp:
-                    remove(nomFichierCompare);
-                    transfert(nomFichierCompare,NAME_BACKUP);
-                    /**
-                     * supprimer le fichier de meme nom dans BackUp
-                     * ajouter le fichier modifie de prod dans BackUp
-                     */
-                    retour = true;
-                    break;
+        case INEXIST:
+            printf("ERREUR INEXIST\n");
+            break;
 
-                case INEXIST:
-                    printf("ERREUR INEXIST\n");
-                    break;
+        case UPDATEP: ;
+            // ajouter le nv fichier dans Prod:
+            /**
+             * supprimer le fichier de meme nom dans BackUp
+             * ajouter le fichier modifie de prod dans BackUp
+             */
+            char chemin3[MAX_PATH_SIZE] = "";
+            strcat(chemin3,NAME_PROD);
+            strcat(chemin3,nomFichierCompare);
+            remove(chemin3);
+            transfert(chemin3,NAME_PROD);
+            codeDeRetour = true;
+            break;
 
-                case UPDATEP:
-                    printf("ERREUR DELETE\n");
-                    break;
-
-                default:
-                    break;
-                }
-            }
-
-            free(nomFichier);
-            free(chaineDateProd);
-            free(chaineDateBackUp);
+        default:
+            break;
         }
-    }
-
-    fclose(tmp);
-    fclose(listCSV);
-    remove(NAME_LIST);
-    rename("temp.csv", NAME_LIST);
 
     printf("action bien fini.\n");
-    return retour;
+    return codeDeRetour;
 }
 
 const char *get_field(char *line, int num)
@@ -267,17 +227,18 @@ void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
 
 
 bool transfert(char* ficSrc,char* destination){
-    char commandeFinal[MAX_PATH_SIZE] = "scp "; // la commande final a executer
+    char commandeFinal[MAX_PATH_SIZE] = "scp -p "; // la commande final a executer
     char utilisateur[MAX_UTILISATEUR]; // l'utilisateur actuel
     cuserid(utilisateur); // attribution de l'utilisateur actuel
     strncat(commandeFinal,utilisateur,taille_char(utilisateur)); // on ajoute l'utilistaeur
     strcat(commandeFinal,"@localhost:"); // on ajoute l'adresse de la machine distante
-    strcat(commandeFinal,realpath("stats.csv",NULL)); // on ajoute le fichier a copier
+    strcat(commandeFinal,realpath(ficSrc,NULL)); // on ajoute le fichier a copier
     strcat(commandeFinal," "); 
     strcat(commandeFinal,destination); // on ajoute la destination ou l'on copiera le fichier
     strcat(commandeFinal," 1>/dev/null "); // on enleve la sortie de la commande pour un affichage plus propre
     /**
-     * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir si l'execution s'est bien passe
+     * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir 
+     * si l'execution s'est bien passe
      */
     if(!system(commandeFinal)){
         printf("bonne fin\n");
@@ -292,14 +253,8 @@ bool transfert(char* ficSrc,char* destination){
 
 int taille_char(char *str){
     int i=0;
-    printf("debut===\n");
-    for (i = 0; i < sizeof(str); i++){
-        printf("%c",str[i]);
-        if (str[i]=='\0'){
-            printf("\n");
+    for (i = 0; i < sizeof(str); i++)
+        if (str[i]=='\0')
             return i;
-        }
-    }
-    printf("====fin\n");
     return 0;    
 }
