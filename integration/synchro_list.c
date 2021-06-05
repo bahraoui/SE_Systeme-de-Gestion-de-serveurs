@@ -105,15 +105,8 @@ void write_synchro_file(char* prod, char* backup, char* dest, char* logs, char* 
 	}
 	//init stats
 	char buffStats[255];
-	pthread_mutex_lock(mutexStats);
-	FILE *log = fopen(stats,"a");
-	fgets(buff1, 255, f1);
-	char* plusP = strtok(buffStats, ";");
-	char* plusB = strtok(NULL, "\n");
-	fclose(stats);
-	pthread_mutex_unlock(mutexStats);
-	int plusProd = atoi(plusP);
-	int plusBackup = atoi(plusB);
+	int plusProd = 0;
+	int plusBackup = 0;
 	
 	//debut du traitement
 	char buff1[255];
