@@ -37,8 +37,8 @@ void copy_list()
         dateProd = string_to_date(chaineDateProd);
         dateBackUp = string_to_date(chaineDateBackUp);
         
-        //action = csv_analyse_line(dateProd, dateBackUp);
-        //action_case_file(action,nomFichier);
+        action = csv_analyse_line(dateProd, dateBackUp);
+        action_case_file(action,nomFichier);
         free(nomFichier);
         free(chaineDateProd);
         free(chaineDateBackUp);
@@ -48,61 +48,35 @@ void copy_list()
 
 enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp)
 {
-    time_t origin = time(NULL);
+    time_t origin = (time_t)0;
     int diffDate = difftime(dateProd, dateBackUp);
-    
-    //printf( "Timestamp since January 1, 1970: %ld\n", origin);
-    //printf( "Timestamp since January 1, 1970: %ld\n", dateBackUp);
-    char buff[20];
-    strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&dateProd)); 
-    printf("DATE : %s ",buff);
 
-
-    if (dateBackUp == origin)
-        printf("NULL\n");
+    if (dateProd == origin)
+        return INEXIST;
+    else if (dateBackUp == origin)
+        return CREATE;
     else if (diffDate > 0)
-        printf("tot\n");
+        return UPDATEB;
+    else if (diffDate < 0)
+        return UPDATEP;
     else if (diffDate == 0)
-        printf("same\n");
-    else
-        printf("ERREUR ?\n");
+        return UPTODATE;
+    
 
-    return INEXIST;
+    return UPTODATE;
 }
 
 time_t string_to_date(char *chaineDateComplete)
 {
     time_t date;
-    
-    char *token = strtok(chaineDateComplete, " ");
-    char* dateChaine = token;
-    
-    token = strtok(NULL, " ");
-    char* heureChaine = token;
 
-    
-    struct tm tmdate = {0};
+    struct tm tm;
+    strptime(chaineDateComplete, "%d/%m/%Y-%H:%M:", &tm);
 
-    char *tokenDate = strtok(dateChaine, "/");
-    tmdate.tm_mday = atoi(tokenDate);
-
-    tokenDate = strtok(NULL, "/");
-    tmdate.tm_mon = atoi(tokenDate);
-    //printf("Mois : %s \n",tokenDate);
-
-
-    tokenDate = strtok(NULL, "/");
-    tmdate.tm_year = atoi(tokenDate);
-    //printf("Annee : %s \n",tokenDate);
-
-    char *tokenHeure = strtok(heureChaine, ":");
-    tmdate.tm_hour = atoi(tokenHeure);
-    tokenHeure = strtok(NULL, ":");
-    tmdate.tm_min = atoi(tokenHeure);;
-
-    //printf("DATE : %d /  %d / %d  ----  %d : %d\n",tmdate.tm_mday, tmdate.tm_mon, tmdate.tm_year, tmdate.tm_hour, tmdate.tm_min);
+    date = mktime(&tm);
+    date = timegm(localtime(&date));
    
-    date = mktime(&tmdate);
+
 
     return date;
 }
