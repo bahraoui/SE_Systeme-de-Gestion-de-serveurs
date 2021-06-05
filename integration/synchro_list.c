@@ -89,7 +89,7 @@ void list_fic(const char *chemin, FILE *file, int longPath){
 /**
 *Prends en entrÃ©e deux listes de fichiers et les rassemble en un seul fichier dest.
 */
-void write_synchro_file(char* prod, char* backup, char* dest, char* logs, char* stats, &mutexProd,&mutexBackUp,&mutexLogs,&mutexStats,&mutexListe) {
+void write_synchro_file(char* prod, char* backup, char* dest, char* logs, char* stats, pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthread_mutex_t*  mutexLogs,pthread_mutex_t*  mutexStats,pthread_mutex_t* mutexListe) {
 	//ouverture des fichiers
 	pthread_mutex_lock(mutexProd);
 	pthread_mutex_lock(mutexBackUp);
@@ -230,8 +230,8 @@ int synchro_list(pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthre
 	fclose(production);
 	fclose(backUp);
 
-	
-	write_synchro_file("production.csv", "backUp.csv", "list_fic.csv");
+
+	write_synchro_file("production.csv", "backUp.csv", "list_fic.csv", "logs.txt", "stats_sync.csv", &mutexProd,&mutexBackUp,&mutexLogs,&mutexStats,&mutexListe)
 
    return 0;
 }
