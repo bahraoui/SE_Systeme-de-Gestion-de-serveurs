@@ -10,28 +10,22 @@
 #define NAME_LIST "list_fic.csv"
 
 /**
- * CREATE = 
- * UPDATE = 
- * DELETE = 
- * INEXIST = 
- * 
-*/
-enum caseFile { CREATE, UPDATE, DELETE, INEXIST};
+ * CREATE = Existe dans Prod pas dans BackUp
+ * UPDATEB = Mettre a jour un fichier de BackUp par rapport à Prod
+ * INEXIST = Existe dans BackUp pas dans Prod
+ * UPDATEP = Mettre a jour un fichier dans Prod par rapport à BackUp
+ */
+enum caseFile {CREATE, UPDATEB, INEXIST, UPDATEP};
 
-//bool pingFile(void);
-
-//bool lock_file(void);
-
-/*
-* prend les 2 dates et renvoie l'action a faire enum
-*/
+/**
+ * prend les 2 dates et renvoie l'action a faire enum
+ */
 enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp);
 
-
-/*
-* Effectue l'action selon le enum
-* switch case
-*/
+/**
+ * Effectue l'action selon le enum
+ * switch case
+ */
 bool action_case_file(enum caseFile action, char* nomFichier);
 
 /**
@@ -45,7 +39,6 @@ time_t string_to_date(char* chaineDate);
  * 
  */ 
 const char* getfield(char* line, int num);
-
 
 void copy_list();
 
