@@ -179,10 +179,14 @@ void write_synchro_file(char* prod, char* backup, char* dest, char* logs, char* 
 	}
 
 	pthread_mutex_lock(mutexStats);
-	FILE *log = fopen(stats,"a");
+	FILE *stats = fopen(stats,"a");
 	char num[12];
-	sprintf(buffStats, "%d",plusProd);
-	sprintf(num, "%d",plusProd);
+    struct tm * pTime = localtime(&timestamp);
+    strftime(buffStats, 80, "%d/%m/%Y %H:%M:%S", pTime );
+	sprintf(buffStats, "%s",plusProd);
+    sprintf(num, "%d",plusProd);
+    strcat(buffStats,";");strcat(buffStats,num)
+	sprintf(num, "%d",plusBackup);
 	strcat(buffStats,";");strcat(buffStats,num)
 	fclose(stats);
 	pthread_mutex_unlock(mutexStats);
@@ -235,5 +239,3 @@ int synchro_list(pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthre
 
    return 0;
 }
-
-
