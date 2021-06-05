@@ -122,7 +122,7 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             char cheminb2[MAX_PATH_SIZE] = "";
             strcat(cheminb2,NAME_PROD);
             strcat(cheminb2,nomFichierCompare);
-            transfert(chemin2,NAME_BACKUP);
+            transfert(cheminb2,NAME_BACKUP);
             printf("APRES\n");
             codeDeRetour = true;
             break;
