@@ -62,7 +62,6 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp)
     else if (diffDate == 0)
         return UPTODATE;
     
-
     return UPTODATE;
 }
 
@@ -88,7 +87,6 @@ time_t string_to_date(char *chaineDateComplete)
  * mutex crée dans le main
  * 
  */ 
-
 bool action_case_file(enum caseFile action, char *nomFichierCompare)
 {
 
