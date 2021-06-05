@@ -53,7 +53,7 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp);
  * @param nomFichier le nom du fichier a que l'on doit créer/copier 
  * La fonction crée ou met à jour les fichiers et incrémente le compteur de réussite et d'echecs
  */
-bool action_case_file(enum caseFile action, char* nomFichier, int numListe);
+bool action_case_file(enum caseFile action, char* nomFichier);
 
 /**
  * Récupère une chaine et la transforme en date
