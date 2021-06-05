@@ -19,6 +19,7 @@
 #define NAME_LIST "list_fic.csv" /* liste des fichiers synchronises entre backup et prod */
 #define NAME_PROD "../production/" /* serveur de production */
 #define NAME_BACKUP "../backup/" /* serveur backup */
+#define NAME_STAT_COPY "stats_copy.csv" /* stats pour le module copy */
 
 /**
  * Le nombre de fichier recu par le module

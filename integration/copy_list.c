@@ -175,8 +175,7 @@ void generate_stats(){
     strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
     strcat(messageCSV,curentDate);
 
-    //On indique que l'on est dans le module COPY
-    strcat(messageCSV,";COPY;");
+    strcat(messageCSV,";");
 
     //On indique le nombre de succès
     char recuChaine[12];
@@ -199,7 +198,7 @@ void generate_stats(){
     strcat(messageCSV,"\n");
 
     //On ajoute la ligne dans le fichier
-    fileStats = fopen("stats.csv", "a");
+    fileStats = fopen(NAME_STAT_COPY, "a");
     fprintf(fileStats,messageCSV);
     fclose(fileStats);
 }
