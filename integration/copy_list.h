@@ -4,10 +4,14 @@
 #include <time.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #define MAX_UTILISATEUR 100
 #define MAX_SIZE 80
-#define NAME_LIST "list_fic.csv"
+#define MAX_PATH_SIZE 400
+#define NAME_LIST "list_fic.csv" /* liste des fichiers synchronises entre backup et prod */
+#define NAME_PROD "production" /* serveur de production */
+#define NAME_BACKUP "backup" /* serveur backup */
 
 /**
  * CREATE = Existe dans Prod pas dans BackUp
@@ -42,6 +46,16 @@ const char* getfield(char* line, int num);
 
 void copy_list();
 
+/**
+ * transfert du fichier @param ficSrc vers la destination @param destination
+ * 
+ * 
+ */
+int transfert(char* ficSrc,char* destination);
 
-
- 
+/**
+ * Donne la taille d'une chaine de caracteres 
+ * @param str chaine de caracteres a verfier
+ * 
+ */
+int taille_char(char *str);
