@@ -9,6 +9,7 @@
 #include <time.h>
 #include <stdlib.h>
 
+/*Permet de changer une date de type time_t en string*/
 void date_to_string(time_t date, char *mtime){
 
     time_t t = date;
@@ -88,8 +89,11 @@ void list_fic(const char *chemin, FILE *file, int longPath){
 /**
 *Prends en entrÃ©e deux listes de fichiers et les rassemble en un seul fichier dest.
 */
-void write_synchro_file(char* prod, char* backup, char* dest) {
+void write_synchro_file(char* prod, char* backup, char* dest, char* logs, char* stats, pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthread_mutex_t*  mutexLogs,pthread_mutex_t*  mutexStats,pthread_mutex_t* mutexListe) {
 	//ouverture des fichiers
+	pthread_mutex_lock(mutexProd);
+	pthread_mutex_lock(mutexBackUp);
+	pthread_mutex_lock(mutexListe);
 	FILE *f1 = fopen(prod,"r");
 	FILE *f2 = fopen(backup,"r");
 	FILE *f3 = fopen(dest,"w");
@@ -99,6 +103,18 @@ void write_synchro_file(char* prod, char* backup, char* dest) {
 	if (f2 == NULL) {
 		return;
 	}
+	//init stats
+	char buffStats[255];
+	pthread_mutex_lock(mutexStats);
+	FILE *log = fopen(stats,"a");
+	fgets(buff1, 255, f1);
+	char* plusP = strtok(buffStats, ";");
+	char* plusB = strtok(NULL, "\n");
+	fclose(stats);
+	pthread_mutex_unlock(mutexStats);
+	int plusProd = atoi(plusP);
+	int plusBackup = atoi(plusB);
+	
 	//debut du traitement
 	char buff1[255];
 	char buff2[255];
@@ -131,13 +147,27 @@ void write_synchro_file(char* prod, char* backup, char* dest) {
 		//comparaison
 		if (cmp<0) {		//dans prod mais pas dans backup
 			pass2=1;
-			printf("fichier %s manquant dans backup\n", name1);
+			
+			pthread_mutex_lock(mutexLogs);
+			FILE *log = fopen(logs,"a");
+			fprintf("fichier %s manquant dans backup\n", name1);
+			plusProd++;
+			fclose(log);
+			pthread_mutex_unlock(mutexLogs);
+
 			strcat(buff3,name1); strcat(buff3,";");strcat(buff3,date1); strcat(buff3,";"); strcat(buff3,"1/1/1970-01:0");strcat(buff3,"\n");
 			fputs(buff3,f3);
 		}
 		else if (cmp>0) {		//dans backup mais pas dans prod
 			pass1=1;
-			printf("fichier %s manquant dans prod\n", name2);
+
+			pthread_mutex_lock(mutexLogs);
+			FILE *log = fopen(logs,"a");
+			fprintf("fichier %s manquant dans prod\n", name2);
+			plusBackup++;
+			fclose(log);
+			pthread_mutex_unlock(mutexLogs);
+
 			strcat(buff3,name2); strcat(buff3,";"); strcat(buff3,"1/1/1970-01:0"); strcat(buff3,";"); strcat(buff3,date2);strcat(buff3,"\n");
 			fputs(buff3,f3);
 		}
@@ -147,10 +177,22 @@ void write_synchro_file(char* prod, char* backup, char* dest) {
 		}
 		buff3[0]='\0';
 	}
+
+	pthread_mutex_lock(mutexStats);
+	FILE *log = fopen(stats,"a");
+	char num[12];
+	sprintf(buffStats, "%d",plusProd);
+	sprintf(num, "%d",plusProd);
+	strcat(buffStats,";");strcat(buffStats,num)
+	fclose(stats);
+	pthread_mutex_unlock(mutexStats);
+
 	fclose(f1);
 	fclose(f2);
 	fclose(f3);
-
+	pthread_mutex_unlock(mutexProd);
+	pthread_mutex_unlock(mutexBackUp);
+	pthread_mutex_unlock(mutexListe);
 }
 
 int synchro_list(pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthread_mutex_t*  mutexLogs,pthread_mutex_t*  mutexStats,pthread_mutex_t* mutexListe){
@@ -188,8 +230,8 @@ int synchro_list(pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthre
 	fclose(production);
 	fclose(backUp);
 
-	
-	write_synchro_file("production.csv", "backUp.csv", "list_fic.csv");
+
+	write_synchro_file("production.csv", "backUp.csv", "list_fic.csv", "logs.txt", "stats_sync.csv", &mutexProd,&mutexBackUp,&mutexLogs,&mutexStats,&mutexListe)
 
    return 0;
 }
