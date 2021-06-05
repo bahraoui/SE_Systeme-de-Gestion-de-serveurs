@@ -1,12 +1,4 @@
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <string.h>
-#define __USE_XOPEN
-#include <time.h>
-#include <stdlib.h>
+#include "synchro_list.h"
 
 void date_to_string(time_t date, char *mtime){
 
