@@ -127,6 +127,7 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
                      * et dans le else ajouter la ligne classique
                      */
                     // ajouter le nv fichier dans BackUp
+                    transfert(nomFichierCompare,NAME_BACKUP);
                     retour = true;
                     break;
 
@@ -139,7 +140,7 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
                      */
                     // ajouter le nv fichier dans BackUp:
                     remove(nomFichierCompare);
-                    transfert(nomFichierCompare,"backup");
+                    transfert(nomFichierCompare,NAME_BACKUP);
                     /**
                      * supprimer le fichier de meme nom dans BackUp
                      * ajouter le fichier modifie de prod dans BackUp
