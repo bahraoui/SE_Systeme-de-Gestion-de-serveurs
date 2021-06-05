@@ -1,3 +1,4 @@
+#include "synchro_list.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -83,8 +84,9 @@ void list_fic(const char *chemin, FILE *file, int longPath){
 	
 }
 
+
 /**
-*Prend en entrée deux listes de fichiers et les rassemble en un seul fichier dest.
+*Prends en entrÃ©e deux listes de fichiers et les rassemble en un seul fichier dest.
 */
 void write_synchro_file(char* prod, char* backup, char* dest) {
 	//ouverture des fichiers
@@ -101,6 +103,7 @@ void write_synchro_file(char* prod, char* backup, char* dest) {
 	char buff1[255];
 	char buff2[255];
 	char buff3[512];
+	buff3[0]='\0';
 	int running = 1;int f1IsNull=0;int f2IsNull=0;int pass1=0;int pass2=0;
 	while(running) {
 		//gestion passage de tour et fin du programme
@@ -125,32 +128,32 @@ void write_synchro_file(char* prod, char* backup, char* dest) {
 		char* name2 = strtok(copybuff2, ";");
 		char* date2 = strtok(NULL, "\n");
 		int cmp = strcmp(name1,name2);
-		printf("%s %s", name1, name2);
 		//comparaison
 		if (cmp<0) {		//dans prod mais pas dans backup
 			pass2=1;
 			printf("fichier %s manquant dans backup\n", name1);
 			strcat(buff3,name1); strcat(buff3,";");strcat(buff3,date1); strcat(buff3,";"); strcat(buff3,"1/1/1970-01:0");strcat(buff3,"\n");
-			printf("%s\n",buff3);
 			fputs(buff3,f3);
 		}
 		else if (cmp>0) {		//dans backup mais pas dans prod
 			pass1=1;
 			printf("fichier %s manquant dans prod\n", name2);
 			strcat(buff3,name2); strcat(buff3,";"); strcat(buff3,"1/1/1970-01:0"); strcat(buff3,";"); strcat(buff3,date2);strcat(buff3,"\n");
-			printf("%s\n",buff3);
 			fputs(buff3,f3);
 		}
-		else {				//les deux sont presents
+		else if (strcmp(name1,"|")!=0 && strcmp(name2,"|")!=0){				//les deux sont presents
 			strcat(buff3,name1); strcat(buff3,";");strcat(buff3,date1); strcat(buff3,";"); strcat(buff3,date2);strcat(buff3,"\n");
-			printf("%s\n",buff3);
 			fputs(buff3,f3);
 		}
 		buff3[0]='\0';
 	}
+	fclose(f1);
+	fclose(f2);
+	fclose(f3);
+
 }
 
-int main(){
+int synchro_list(){
 
 	//Ouverture du fichier de récupération de l'analyse du répertoire de production
 	FILE* production = fopen("production.csv","w");
@@ -159,7 +162,7 @@ int main(){
 	FILE* backUp = fopen("backUp.csv","w");
 
 	//Chemin du répertoire à analyser du serveur de production
-	char dirProd[] = "/home/jonathan/Documents/WINDOWS/ISTY/1ere_annee/";
+	char dirProd[] = ".";
 
 	//Chemin du répertoire à analyser du serveur de backup
 	char dirBack[] = ".";
@@ -179,8 +182,8 @@ int main(){
 	*/
 	list_fic(dirBack,backUp,strlen(dirBack)+1);
 
-	fprintf(production,"|");
-	fprintf(backUp,"|");
+	fprintf(production,"|;g");
+	fprintf(backUp,"|;g");
 
 	fclose(production);
 	fclose(backUp);
@@ -190,4 +193,5 @@ int main(){
 
    return 0;
 }
+
 
