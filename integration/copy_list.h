@@ -33,38 +33,38 @@ int failed;
 enum caseFile {CREATE, UPDATEB, INEXIST, UPDATEP, UPTODATE};
 
 /**
- * prend les 2 dates et renvoie l'action a faire enum
+ * Cette fonction prend les dates en paramètre et renvoie l'action en conséquence
  */
 enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp);
 
 /**
- * Effectue l'action selon le enum
- * switch case
+ * Effectue l'action de copie selon le caseFile donné en paramètre
+ * La fonction crée ou met à jour les fichiers et incrémente le compteur de réussite et d'echecs
  */
 bool action_case_file(enum caseFile action, char* nomFichier);
 
 /**
- * Récupère la chaine du csv et on renvoie une date
+ * Récupère une chaine et la transforme en date
  */
 time_t string_to_date(char* chaineDate);
 
 /**
- * Récupere la données d'une ligne csv selon un indice donné en paramètre
+ * Récupere le contenu d'une ligne csv selon un indice donné en paramètre
  * 
  */ 
 const char* get_field(char* line, int num);
 
-
 /**
- * Ajoute dans le fichier logs  les informations d'une copie
+ * Ajoute dans le fichier logs les informations d'une copie
  * 
  */
 void generate_logs(char* nomFichier, enum caseFile action, bool erreur);
 
-
+/**
+ * Ajoute dans le fichier stats les informations de toute la phase de copie
+ * 
+ */
 void generate_stats();
-
-
 
 void copy_list();
 /*
