@@ -280,12 +280,12 @@ bool transfert(char* ficSrc,char* destination){
      */
     if(!system(commandeFinal)){
         printf("bonne fin\n");
-        return 1;
+        return true;
     } else {
-        printf("mauvaise fin\n");
-        return 0;
+        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n");
+        return false;
     }
-    return 0;
+    return false;
 }
 
 
