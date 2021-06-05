@@ -1,5 +1,18 @@
 #include "copy_list.h"
 
+/**
+ * Le nombre de fichier recu par le module
+ */
+int recu = 0;
+/**
+ * Le nombre de mofication reussi
+ */
+int success = 0;
+/**
+ * Le nombre de mofication echoué
+ */
+int failed = 0;
+
 //Fonction principale du module COPY LIST
 void copy_list()
 {
@@ -33,10 +46,10 @@ void copy_list()
         action = csv_analyse_line(dateProd, dateBackUp);
 
         //On effectue l'action pour le fichier récupérer
-        //copyData = action_case_file(action,nomFichier);
+        copyData = action_case_file(action,nomFichier);
         
         //On ajoute une ligne dans le fichier de logs
-        generate_logs(nomFichier,action,true);
+        generate_logs(nomFichier,action,copyData);
 
         //On incrémente le nombre de fichier recu
         recu++;
@@ -48,6 +61,9 @@ void copy_list()
     }
     //On ajoute une ligne dans le fichier de stats avec les fichiers recu, le nombre de succes et d'echecs
     generate_stats();
+    printf("Nombre de fichier recu :%d \n",recu);
+    printf("Succes :%d \n",success);
+    printf("Fail :%d \n",failed);
     fclose(listCSV);
 }
 
@@ -57,6 +73,10 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp)
     //Date origin = NULL
     time_t origin = (time_t)0;
     int diffDate = difftime(dateProd, dateBackUp);    
+
+    /*printf("DATE PROD : %ld\n",dateProd);
+    printf("DATE BACKUP: %ld\n",dateBackUp);
+    printf("DATE Origin: %ld\n",origin);*/
 
     if (dateProd == origin)
         return INEXIST;
@@ -76,13 +96,13 @@ enum caseFile csv_analyse_line(time_t dateProd, time_t dateBackUp)
 bool action_case_file(enum caseFile action, char *nomFichierCompare)
 {
     bool codeDeRetour = false;
-    printf("action en cours...\n");
+    printf("ACTION : %d\n",action);
     switch (action)
         {
         case CREATE: ;
             // ajouter le nv fichier dans BackUp
             char chemin[MAX_PATH_SIZE] = "";
-            strcat(chemin,NAME_BACKUP);
+            strcat(chemin,NAME_PROD);
             strcat(chemin,nomFichierCompare);
             transfert(chemin,NAME_BACKUP);
             codeDeRetour = true;
@@ -94,6 +114,7 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
              * supprimer le fichier de meme nom dans BackUp
              * ajouter le fichier modifie de prod dans BackUp
              */
+            printf("DEDANS\n");
             char chemin2[MAX_PATH_SIZE] = "";
             strcat(chemin2,NAME_BACKUP);
             strcat(chemin2,nomFichierCompare);
@@ -101,14 +122,11 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             char cheminb2[MAX_PATH_SIZE] = "";
             strcat(cheminb2,NAME_PROD);
             strcat(cheminb2,nomFichierCompare);
-            transfert(chemin2,NAME_BACKUP);
+            transfert(cheminb2,NAME_BACKUP);
+            printf("APRES\n");
             codeDeRetour = true;
             break;
-
-        case INEXIST:
-            printf("ERREUR INEXIST\n");
-            break;
-
+        
         case UPDATEP: ;
             // ajouter le nv fichier dans Prod:
             /**
@@ -126,6 +144,17 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             codeDeRetour = true;
             break;
 
+        case INEXIST: ;
+            // ajouter le nv fichier dans Prod
+            char chemin4[MAX_PATH_SIZE] = "";
+            strcat(chemin4,NAME_BACKUP);
+            strcat(chemin4,nomFichierCompare);
+            transfert(chemin4,NAME_PROD);
+            codeDeRetour = true;
+            break;
+
+        
+
         default:
             break;
         }
@@ -142,12 +171,18 @@ void generate_stats(){
     //On récupère la date du jour
     char curentDate[MAX_SIZE];
     struct tm * pTime = localtime(&timestamp);
-    char messageCSV[MAX_SIZE] = "\n";
+    char messageCSV[MAX_SIZE] = "";
     strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
     strcat(messageCSV,curentDate);
 
     //On indique que l'on est dans le module COPY
     strcat(messageCSV,";COPY;");
+
+    //On indique le nombre de succès
+    char recuChaine[12];
+    sprintf(recuChaine, "%d", recu);
+    strcat(messageCSV,recuChaine);
+    strcat(messageCSV,";");
 
     //On indique le nombre de succès
     char sucessChaine[12];
@@ -160,6 +195,8 @@ void generate_stats(){
     char failedChaine[12];
     sprintf(failedChaine, "%d", failed);
     strcat(messageCSV,failedChaine);
+
+    strcat(messageCSV,"\n");
 
     //On ajoute la ligne dans le fichier
     fileStats = fopen("stats.csv", "a");
@@ -272,11 +309,14 @@ bool transfert(char* ficSrc,char* destination){
 //On transforme une chaine de caractere en une date de type time_t
 time_t string_to_date(char *chaineDateComplete)
 {
+
     time_t date;
 
     struct tm tm;
+
     strptime(chaineDateComplete, "%d/%m/%Y-%H:%M:", &tm);
 
+    tm.tm_isdst = -1;
     date = mktime(&tm);
     date = timegm(localtime(&date));
    
