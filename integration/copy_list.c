@@ -39,8 +39,8 @@ void copy_list()
         dateBackUp = string_to_date(chaineDateBackUp);
         
         action = csv_analyse_line(dateProd, dateBackUp);
-        copyData = action_case_file(action,nomFichier);
-        generate_logs_stats(nomFichier,action,copyData);
+        //copyData = action_case_file(action,nomFichier);
+        generate_logs_stats(nomFichier,action,true);
 
         free(nomFichier);
         free(chaineDateProd);
@@ -82,13 +82,12 @@ time_t string_to_date(char *chaineDateComplete)
     return date;
 }
 
-
 /***
  * Parametre adresse de mutex
  * 
  * mutex crée dans le main
  * 
- */ 
+ */
 bool action_case_file(enum caseFile action, char *nomFichierCompare)
 {
 
@@ -96,12 +95,8 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
      * si action == create
      *      On cree dans backup le fichier create
      * 
-     * 
      * si action == update
      *      On update
-     *  
-     * 
-     * 
      */
     bool retour = false;
     char ligne[1024];
@@ -118,54 +113,55 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
         while (fgets(ligne, 1024, listCSV))
         {
 
+            //if (strcmp(nomFichier, nomFichierCompare) == 0) {
             char *nomFichier = strdup(get_field(strdup(ligne), 1));
             char *chaineDateProd = strdup(get_field(strdup(ligne), 2));
             char *chaineDateBackUp = strdup(get_field(strdup(ligne), 3));
-            switch (action)
+            if (strcmp(nomFichier, nomFichierCompare) == 0)
             {
-            case CREATE:
-                printf("CREATE\n");
-                if (strcmp(nomFichier, nomFichierCompare) == 0)
-                { // ce if se fera surement en dehors du switch/case
+                switch (action)
+                {
+                case CREATE:
+                    printf("CREATE\n");
                     // mettre a jour csv:
                     /**
-                 * ajouter le nv fichier ac la bonne date à temp dans ce if
-                 * et dans le else ajouter la ligne classique
-                 */
+                     * ajouter le nv fichier ac la bonne date à temp dans ce if
+                     * et dans le else ajouter la ligne classique
+                     */
                     // ajouter le nv fichier dans BackUp
+                    retour = true;
+                    break;
+
+                case UPDATEB:
+                    printf("UPDATE\n");
+                    // mettre a jour csv:
+                    /**
+                     * modifier le fichier ac la bonne date à temp dans ce if
+                     * et dans le else ajouter la ligne classique
+                     */
+                    // ajouter le nv fichier dans BackUp:
+                    remove(nomFichierCompare);
+                    transfert(nomFichierCompare,"backup");
+                    /**
+                     * supprimer le fichier de meme nom dans BackUp
+                     * ajouter le fichier modifie de prod dans BackUp
+                     */
+                    retour = true;
+                    break;
+
+                case INEXIST:
+                    printf("ERREUR INEXIST\n");
+                    break;
+
+                case UPDATEP:
+                    printf("ERREUR DELETE\n");
+                    break;
+
+                default:
                     break;
                 }
-                retour = true;
-                break;
-
-            case UPDATEB:
-                printf("UPDATE\n");
-                // mettre a jour csv:
-                /**
-             * modifier le fichier ac la bonne date à temp dans ce if
-             * et dans le else ajouter la ligne classique
-             */
-                // ajouter le nv fichier dans BackUp:
-                /**
-             * supprimer le fichier de meme nom dans BackUp
-             * ajouter le fichier modifie de prod dans BackUp
-             */
-                retour = true;
-                break;
-
-
-
-            case INEXIST:
-                printf("ERREUR INEXIST\n");
-                break;
-            
-            case UPDATEP:
-                printf("ERREUR DELETE\n");
-                break;
-
-            default:
-                break;
             }
+
             free(nomFichier);
             free(chaineDateProd);
             free(chaineDateBackUp);
@@ -194,12 +190,115 @@ const char *get_field(char *line, int num)
     return NULL;
 }
 
-
 void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
     time_t timestamp = time( NULL );
+    FILE *fileLog;
+    char curentDate[ MAX_SIZE ];
     struct tm * pTime = localtime( & timestamp );
+    char messageLogs[MAX_MESSAGE] = "";
+    char messageCSV[MAX_MESSAGE] = "";
+    
+    //Date du jour
+    strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
 
-    char buffer[ MAX_SIZE ];
-    strftime( buffer, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
-    printf( "Date and french time : %s\n", buffer );
+    strcat(messageLogs,curentDate);
+
+    switch (action)
+    {
+    case CREATE:
+        if (error){
+            strcat(messageLogs," : [CREATE-SUCCESS] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," in BACKUP\n"); 
+        }
+            
+        else {
+            strcat(messageLogs," : [CREATE-FAILED] ");  
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," in BACKUP\n"); 
+        }
+        break;
+    case UPDATEB:
+        if (error) {
+            strcat(messageLogs," : [UPDATE-SUCCESS] ");
+            strcat(messageLogs, nomFichier);
+            strcat(messageLogs," from PROD to BACKUP \n"); 
+        }
+            
+        else {
+            strcat(messageLogs," : [UPDATE-FAILED] ");
+            strcat(messageLogs, nomFichier);
+            strcat(messageLogs," from PROD to BACKUP \n"); 
+        }
+        break;
+    case UPDATEP:
+        if (error) {
+            strcat(messageLogs," : [UPDATE-SUCCESS] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," from BACKUP to PROD \n");
+        }   
+        else {
+            strcat(messageLogs," : [UPDATE-FAILED] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," from BACKUP to PROD \n");
+        }
+        break;
+    case INEXIST:
+        if (error) {
+            strcat(messageLogs," : [CREATE-SUCCESS] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," nomFichier in PROD \n");
+        }
+        else {
+            strcat(messageLogs," : [CREATE-FAILED] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," nomFichier in PROD \n");
+
+        } 
+        break;
+    default:
+        break;
+    }
+    fileLog = fopen("logs.txt", "a");
+    fprintf(fileLog,messageLogs);
+    fclose(fileLog);
+}
+
+
+bool transfert(char* ficSrc,char* destination){
+    char commandeFinal[MAX_PATH_SIZE] = "scp "; // la commande final a executer
+    char utilisateur[MAX_UTILISATEUR]; // l'utilisateur actuel
+    cuserid(utilisateur); // attribution de l'utilisateur actuel
+    strncat(commandeFinal,utilisateur,taille_char(utilisateur)); // on ajoute l'utilistaeur
+    strcat(commandeFinal,"@localhost:"); // on ajoute l'adresse de la machine distante
+    strcat(commandeFinal,realpath("stats.csv",NULL)); // on ajoute le fichier a copier
+    strcat(commandeFinal," "); 
+    strcat(commandeFinal,destination); // on ajoute la destination ou l'on copiera le fichier
+    strcat(commandeFinal," 1>/dev/null ");
+    /**
+     * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir si l'execution s'est bien passe
+     */
+    if(!system(commandeFinal)){
+        printf("bonne fin\n");
+        return 1;
+    } else {
+        printf("mauvaise fin\n");
+        return 0;
+    }
+    return 0;
+}
+
+
+int taille_char(char *str){
+    int i=0;
+    printf("debut===\n");
+    for (i = 0; i < sizeof(str); i++){
+        printf("%c",str[i]);
+        if (str[i]=='\0'){
+            printf("\n");
+            return i;
+        }
+    }
+    printf("====fin\n");
+    return 0;    
 }
