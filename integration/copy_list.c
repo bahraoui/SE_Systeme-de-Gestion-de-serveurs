@@ -188,7 +188,7 @@ const char *getfield(char *line, int num)
     return NULL;
 }
 
-int transfert(char* ficSrc,char* destination){
+bool transfert(char* ficSrc,char* destination){
     char commandeFinal[MAX_PATH_SIZE] = "scp "; // la commande final a executer
     char utilisateur[MAX_UTILISATEUR]; // l'utilisateur actuel
     cuserid(utilisateur); // attribution de l'utilisateur actuel
@@ -203,12 +203,12 @@ int transfert(char* ficSrc,char* destination){
      */
     if(!system(commandeFinal)){
         printf("bonne fin\n");
-        return EXIT_SUCCESS;
+        return true;
     } else {
-        printf("mauvaise fin\n");
-        return EXIT_FAILURE;
+        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n");
+        return false;
     }
-    return EXIT_FAILURE;
+    return false;
 }
 
 

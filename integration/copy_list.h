@@ -52,11 +52,11 @@ const char* getfield(char* line, int num);
 void copy_list();
 
 /**
- * transfert du fichier @param ficSrc vers la destination @param destination
- * 
+ * transfert du fichier ficSrc vers la destination destination
+ * @return un booleen indiquant si le transfert s'est bien effectue
  * 
  */
-int transfert(char* ficSrc,char* destination);
+bool transfert(char* ficSrc,char* destination);
 
 /**
  * Donne la taille d'une chaine de caracteres 
