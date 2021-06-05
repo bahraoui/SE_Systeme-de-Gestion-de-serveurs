@@ -84,7 +84,6 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             char chemin[MAX_PATH_SIZE] = "";
             strcat(chemin,NAME_BACKUP);
             strcat(chemin,nomFichierCompare);
-            remove(chemin);
             transfert(chemin,NAME_BACKUP);
             codeDeRetour = true;
             break;
@@ -99,6 +98,9 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             strcat(chemin2,NAME_BACKUP);
             strcat(chemin2,nomFichierCompare);
             remove(chemin2);
+            char cheminb2[MAX_PATH_SIZE] = "";
+            strcat(cheminb2,NAME_PROD);
+            strcat(cheminb2,nomFichierCompare);
             transfert(chemin2,NAME_BACKUP);
             codeDeRetour = true;
             break;
@@ -116,8 +118,11 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
             char chemin3[MAX_PATH_SIZE] = "";
             strcat(chemin3,NAME_PROD);
             strcat(chemin3,nomFichierCompare);
-            remove(chemin3);
-            transfert(chemin3,NAME_PROD);
+            remove(chemin3); // prod/a
+            char cheminb3[MAX_PATH_SIZE] = "";
+            strcat(cheminb3,NAME_BACKUP);
+            strcat(cheminb3,nomFichierCompare);
+            transfert(cheminb3,NAME_PROD);
             codeDeRetour = true;
             break;
 
@@ -257,7 +262,7 @@ bool transfert(char* ficSrc,char* destination){
         success++;
         return true;
     } else {
-        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n");
+        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n\t1. Vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. Vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n3. Pour tout autre problème, veuillez verifier votre systeme, sinon\n\n");
         failed++;
         return false;
     }
