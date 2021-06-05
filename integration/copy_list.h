@@ -15,6 +15,7 @@
 #define MAX_UTILISATEUR 100
 #define MAX_SIZE 80
 #define MAX_PATH_SIZE 400
+#define MAX_MESSAGE 500
 #define NAME_LIST "list_fic.csv" /* liste des fichiers synchronises entre backup et prod */
 #define NAME_PROD "production" /* serveur de production */
 #define NAME_BACKUP "backup" /* serveur backup */
@@ -47,11 +48,20 @@ time_t string_to_date(char* chaineDate);
  * Récupere la données d'une ligne csv selon un indice donné en paramètre
  * 
  */ 
-const char* getfield(char* line, int num);
+const char* get_field(char* line, int num);
 
-void copy_list();
 
 /**
+ * Ajoute dans le fichier logs et stats les informations d'une copie
+ * 
+ */
+void generate_logs_stats(char* nomFichier, enum caseFile action, bool erreur);
+
+
+void copy_list();
+/*
+ * transfert du fichier @param ficSrc vers la destination @param destination
+ * 
  * transfert du fichier ficSrc vers la destination destination
  * @return un booleen indiquant si le transfert s'est bien effectue
  * 

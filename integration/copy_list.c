@@ -20,6 +20,7 @@ void copy_list()
     enum caseFile action;
     time_t dateProd;
     time_t dateBackUp;
+    bool copyData;
 
     FILE *listCSV = fopen(NAME_LIST, "r");
 
@@ -31,14 +32,16 @@ void copy_list()
     fgets(ligne, 1024, listCSV);
     while (fgets(ligne, 1024, listCSV))
     {
-        char *nomFichier = strdup(getfield(strdup(ligne), 1));
-        char *chaineDateProd = strdup(getfield(strdup(ligne), 2));
-        char *chaineDateBackUp = strdup(getfield(strdup(ligne), 3));
+        char *nomFichier = strdup(get_field(strdup(ligne), 1));
+        char *chaineDateProd = strdup(get_field(strdup(ligne), 2));
+        char *chaineDateBackUp = strdup(get_field(strdup(ligne), 3));
         dateProd = string_to_date(chaineDateProd);
         dateBackUp = string_to_date(chaineDateBackUp);
         
-        //action = csv_analyse_line(dateProd, dateBackUp);
-        //action_case_file(action,nomFichier);
+        action = csv_analyse_line(dateProd, dateBackUp);
+        //copyData = action_case_file(action,nomFichier);
+        generate_logs_stats(nomFichier,action,true);
+
         free(nomFichier);
         free(chaineDateProd);
         free(chaineDateBackUp);
@@ -76,7 +79,6 @@ time_t string_to_date(char *chaineDateComplete)
     date = timegm(localtime(&date));
    
 
-
     return date;
 }
 
@@ -112,9 +114,9 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
         {
 
             //if (strcmp(nomFichier, nomFichierCompare) == 0) {
-            char *nomFichier = strdup(getfield(strdup(ligne), 1));
-            char *chaineDateProd = strdup(getfield(strdup(ligne), 2));
-            char *chaineDateBackUp = strdup(getfield(strdup(ligne), 3));
+            char *nomFichier = strdup(get_field(strdup(ligne), 1));
+            char *chaineDateProd = strdup(get_field(strdup(ligne), 2));
+            char *chaineDateBackUp = strdup(get_field(strdup(ligne), 3));
             if (strcmp(nomFichier, nomFichierCompare) == 0)
             {
                 switch (action)
@@ -176,7 +178,7 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
     return retour;
 }
 
-const char *getfield(char *line, int num)
+const char *get_field(char *line, int num)
 {
     const char *tok;
     for (tok = strtok(line, ";");
@@ -188,6 +190,81 @@ const char *getfield(char *line, int num)
     }
     return NULL;
 }
+
+void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
+    time_t timestamp = time( NULL );
+    FILE *fileLog;
+    char curentDate[ MAX_SIZE ];
+    struct tm * pTime = localtime( & timestamp );
+    char messageLogs[MAX_MESSAGE] = "";
+    char messageCSV[MAX_MESSAGE] = "";
+    
+    //Date du jour
+    strftime(curentDate, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
+
+    strcat(messageLogs,curentDate);
+
+    switch (action)
+    {
+    case CREATE:
+        if (error){
+            strcat(messageLogs," : [CREATE-SUCCESS] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," in BACKUP\n"); 
+        }
+            
+        else {
+            strcat(messageLogs," : [CREATE-FAILED] ");  
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," in BACKUP\n"); 
+        }
+        break;
+    case UPDATEB:
+        if (error) {
+            strcat(messageLogs," : [UPDATE-SUCCESS] ");
+            strcat(messageLogs, nomFichier);
+            strcat(messageLogs," from PROD to BACKUP \n"); 
+        }
+            
+        else {
+            strcat(messageLogs," : [UPDATE-FAILED] ");
+            strcat(messageLogs, nomFichier);
+            strcat(messageLogs," from PROD to BACKUP \n"); 
+        }
+        break;
+    case UPDATEP:
+        if (error) {
+            strcat(messageLogs," : [UPDATE-SUCCESS] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," from BACKUP to PROD \n");
+        }   
+        else {
+            strcat(messageLogs," : [UPDATE-FAILED] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," from BACKUP to PROD \n");
+        }
+        break;
+    case INEXIST:
+        if (error) {
+            strcat(messageLogs," : [CREATE-SUCCESS] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," nomFichier in PROD \n");
+        }
+        else {
+            strcat(messageLogs," : [CREATE-FAILED] ");
+            strcat(messageLogs,nomFichier);
+            strcat(messageLogs," nomFichier in PROD \n");
+
+        } 
+        break;
+    default:
+        break;
+    }
+    fileLog = fopen("logs.txt", "a");
+    fprintf(fileLog,messageLogs);
+    fclose(fileLog);
+}
+
 
 bool transfert(char* ficSrc,char* destination){
     char commandeFinal[MAX_PATH_SIZE] = "scp "; // la commande final a executer
