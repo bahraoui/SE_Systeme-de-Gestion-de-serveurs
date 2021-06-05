@@ -197,7 +197,7 @@ bool transfert(char* ficSrc,char* destination){
     strcat(commandeFinal,realpath("stats.csv",NULL)); // on ajoute le fichier a copier
     strcat(commandeFinal," "); 
     strcat(commandeFinal,destination); // on ajoute la destination ou l'on copiera le fichier
-    strcat(commandeFinal," 1>/dev/null ");
+    strcat(commandeFinal," 1>/dev/null "); // on enleve la sortie de la commande pour un affichage plus propre
     /**
      * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir si l'execution s'est bien passe
      */
