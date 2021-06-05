@@ -11,3 +11,4 @@
 void date_to_string(time_t date, char *mtime)
 void list_fic(const char *chemin, FILE *file, int longPath);
 void write_synchro_file(char* prod, char* backup, char* dest)
+int main();
