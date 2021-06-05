@@ -41,10 +41,14 @@ time_t string_to_date(char* chaineDate);
  * Récupere la données d'une ligne csv selon un indice donné en paramètre
  * 
  */ 
-const char* getfield(char* line, int num);
-
-void copy_list();
+const char* get_field(char* line, int num);
 
 
+/**
+ * Ajoute dans le fichier logs et stats les informations d'une copie
+ * 
+ */
+void generate_logs_stats(char* nomFichier, enum caseFile action, bool erreur);
 
- 
+
+void copy_list(); 

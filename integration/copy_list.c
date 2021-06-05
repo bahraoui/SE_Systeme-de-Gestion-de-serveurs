@@ -20,6 +20,7 @@ void copy_list()
     enum caseFile action;
     time_t dateProd;
     time_t dateBackUp;
+    bool copyData;
 
     FILE *listCSV = fopen(NAME_LIST, "r");
 
@@ -31,14 +32,16 @@ void copy_list()
     fgets(ligne, 1024, listCSV);
     while (fgets(ligne, 1024, listCSV))
     {
-        char *nomFichier = strdup(getfield(strdup(ligne), 1));
-        char *chaineDateProd = strdup(getfield(strdup(ligne), 2));
-        char *chaineDateBackUp = strdup(getfield(strdup(ligne), 3));
+        char *nomFichier = strdup(get_field(strdup(ligne), 1));
+        char *chaineDateProd = strdup(get_field(strdup(ligne), 2));
+        char *chaineDateBackUp = strdup(get_field(strdup(ligne), 3));
         dateProd = string_to_date(chaineDateProd);
         dateBackUp = string_to_date(chaineDateBackUp);
         
         action = csv_analyse_line(dateProd, dateBackUp);
-        action_case_file(action,nomFichier);
+        copyData = action_case_file(action,nomFichier);
+        generate_logs_stats(nomFichier,action,copyData);
+
         free(nomFichier);
         free(chaineDateProd);
         free(chaineDateBackUp);
@@ -75,7 +78,6 @@ time_t string_to_date(char *chaineDateComplete)
     date = mktime(&tm);
     date = timegm(localtime(&date));
    
-
 
     return date;
 }
@@ -116,9 +118,9 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
         while (fgets(ligne, 1024, listCSV))
         {
 
-            char *nomFichier = strdup(getfield(strdup(ligne), 1));
-            char *chaineDateProd = strdup(getfield(strdup(ligne), 2));
-            char *chaineDateBackUp = strdup(getfield(strdup(ligne), 3));
+            char *nomFichier = strdup(get_field(strdup(ligne), 1));
+            char *chaineDateProd = strdup(get_field(strdup(ligne), 2));
+            char *chaineDateBackUp = strdup(get_field(strdup(ligne), 3));
             switch (action)
             {
             case CREATE:
@@ -179,7 +181,7 @@ bool action_case_file(enum caseFile action, char *nomFichierCompare)
     return retour;
 }
 
-const char *getfield(char *line, int num)
+const char *get_field(char *line, int num)
 {
     const char *tok;
     for (tok = strtok(line, ";");
@@ -190,4 +192,14 @@ const char *getfield(char *line, int num)
             return tok;
     }
     return NULL;
+}
+
+
+void generate_logs_stats(char* nomFichier, enum caseFile action, bool error) {
+    time_t timestamp = time( NULL );
+    struct tm * pTime = localtime( & timestamp );
+
+    char buffer[ MAX_SIZE ];
+    strftime( buffer, MAX_SIZE, "%d/%m/%Y %H:%M:%S", pTime );
+    printf( "Date and french time : %s\n", buffer );
 }
