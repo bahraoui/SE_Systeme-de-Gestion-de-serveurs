@@ -11,6 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define MAX_UTILISATEUR 100
 #define MAX_SIZE 80
@@ -88,7 +89,7 @@ void generate_stats();
  * Fonction principale du module CopyList
  * 
  */
-void copy_list();
+void copy_list(pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthread_mutex_t*  mutexLogs,pthread_mutex_t*  mutexStats,pthread_mutex_t* mutexListe);
 
 
 /**
@@ -99,6 +100,8 @@ void copy_list();
  * 
  */
 bool transfert(char* ficSrc,char* destination);
+
+bool test_server(char* ficSrc,char* destination);
 
 /**
  * Donne la taille d'une chaine de caracteres 

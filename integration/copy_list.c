@@ -14,7 +14,7 @@ int success = 0;
 int failed = 0;
 
 //Fonction principale du module COPY LIST
-void copy_list()
+void copy_list(pthread_mutex_t*  mutexProd,pthread_mutex_t*  mutexBackUp,pthread_mutex_t*  mutexLogs,pthread_mutex_t*  mutexStats, pthread_mutex_t* mutexListe)
 {
     //Déclaration des variables
     char ligne[1024];
@@ -22,7 +22,10 @@ void copy_list()
     time_t dateProd;
     time_t dateBackUp;
     bool copyData;
-
+    // On lock les mutex corresopndants pour avoir l'acces
+    pthread_mutex_lock(mutexListe);
+    pthread_mutex_lock(mutexProd);
+    pthread_mutex_lock(mutexBackUp);
     //On ouvre la liste de fichier 
     FILE *listCSV = fopen(NAME_LIST, "r");
     if (listCSV == NULL)
@@ -49,7 +52,9 @@ void copy_list()
         copyData = action_case_file(action,nomFichier);
         
         //On ajoute une ligne dans le fichier de logs
+        pthread_mutex_lock(mutexLogs);
         generate_logs(nomFichier,action,copyData);
+        pthread_mutex_unlock(mutexLogs);
 
         //On incrémente le nombre de fichier recu
         recu++;
@@ -59,12 +64,18 @@ void copy_list()
         free(chaineDateProd);
         free(chaineDateBackUp); 
     }
-    //On ajoute une ligne dans le fichier de stats avec les fichiers recu, le nombre de succes et d'echecs
-    generate_stats();
+    pthread_mutex_unlock(mutexProd);
+    pthread_mutex_unlock(mutexBackUp);
+    //stats
+    pthread_mutex_lock(mutexStats);
+    generate_stats(); //On ajoute une ligne dans le fichier de stats avec les fichiers recu, le nombre de succes et d'echecs
+    pthread_mutex_unlock(mutexStats);
+    // fermeture du fichier
     printf("Nombre de fichier recu :%d \n",recu);
     printf("Succes :%d \n",success);
     printf("Fail :%d \n",failed);
     fclose(listCSV);
+    pthread_mutex_unlock(mutexListe);
 }
 
 //On a analyse deux dates pour savoir quelle action a effectué sur le fichier
@@ -289,7 +300,7 @@ bool transfert(char* ficSrc,char* destination){
     strcat(commandeFinal,realpath(ficSrc,NULL)); // on ajoute le fichier a copier
     strcat(commandeFinal," "); 
     strcat(commandeFinal,destination); // on ajoute la destination ou l'on copiera le fichier
-    strcat(commandeFinal," 1>/dev/null "); // on enleve la sortie de la commande pour un affichage plus propre
+    strcat(commandeFinal," "); // on enleve la sortie de la commande pour un affichage plus propre
     /**
      * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir 
      * si l'execution s'est bien passe
@@ -299,7 +310,35 @@ bool transfert(char* ficSrc,char* destination){
         success++;
         return true;
     } else {
-        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n\t1. Vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. Vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n3. Pour tout autre problème, veuillez verifier votre systeme, sinon\n\n");
+        printf("Le systeme a essaye en vain d'executer cette commande : %s\n",commandeFinal);
+        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n\t1. Vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. Vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n\t3. Pour tout autre problème, veuillez verifier votre systeme UNIX.\n\n");
+        failed++;
+        return false;
+    }
+    return false;
+}
+
+bool test_server(char* ficSrc,char* destination){
+    char commandeFinal[MAX_PATH_SIZE] = "scp "; // la commande final a executer
+    char utilisateur[MAX_UTILISATEUR]; // l'utilisateur actuel
+    cuserid(utilisateur); // attribution de l'utilisateur actuel
+    strncat(commandeFinal,utilisateur,taille_char(utilisateur)); // on ajoute l'utilistaeur
+    strcat(commandeFinal,"@localhost:"); // on ajoute l'adresse de la machine distante
+    strcat(commandeFinal,realpath(ficSrc,NULL)); // on ajoute le fichier a copier
+    strcat(commandeFinal," "); 
+    strcat(commandeFinal,destination); // on ajoute la destination ou l'on copiera le fichier
+    strcat(commandeFinal," "); // on enleve la sortie de la commande pour un affichage plus propre
+    /**
+     * On execute la commande recuperer et on retourne la valeur de retour de la commande pour savoir 
+     * si l'execution s'est bien passe
+     */
+    if(!system(commandeFinal)){
+        printf("bonne fin\n");
+        success++;
+        return true;
+    } else {
+        printf("Le systeme a essaye en vain d'executer cette commande : %s\n",commandeFinal);
+        printf("Le transfert n'a pas pu bien se passer, a cause de soit:\n\t1. Vous n'avez pas installe ssh : solution : \"sudo apt-get install ssh\"\n\t2. Vous n'avez pas lance ssh : solution \"sudo service ssh start\"\n\t3. Pour tout autre problème, veuillez verifier votre systeme UNIX.\n\n");
         failed++;
         return false;
     }
@@ -325,15 +364,15 @@ time_t string_to_date(char *chaineDateComplete)
 }
 
 //On récupère un élément d'une ligne du csv selon un indice
-const char *get_field(char *line, int num)
+const char *get_field(char *ligne, int num)
 {
-    const char *tok;
-    for (tok = strtok(line, ";");
-         tok && *tok;
-         tok = strtok(NULL, ";\n"))
+    const char *delimiteur;
+    for (delimiteur = strtok(ligne, ";");
+         delimiteur && *delimiteur;
+         delimiteur = strtok(NULL, ";\n"))
     {
         if (!--num)
-            return tok;
+            return delimiteur;
     }
     return NULL;
 }
